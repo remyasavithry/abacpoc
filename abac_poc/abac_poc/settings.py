@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_mongoengine',
+    'mongo_auth',
     'user',
     'company',
     'opportunity'
@@ -51,8 +52,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'opportunity.middleware.KeycloakMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
 
@@ -146,21 +146,8 @@ def setup_connection():
 setup_connection()
 
 
-# Excempt list - URL paths that doesn't need Keycloak Authorization
-KEYCLOAK_BEARER_AUTHENTICATION_EXEMPT_PATHS = [
-    'admin', 'accounts',
-    ]
-CONFIG_DIR = os.path.join(os.path.dirname(__file__),os.pardir)
-KEYCLOAK_CLIENT_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkols8lyzvWprOuu5F18kf3bmuFuyaprio23clDQFPtpDoNLXmrA24DxkEm8B0UI8UZW44BJf8Xzdaahlpz62nYuDnB8Pf5s2fkYJ2btSUob7fn1qJRUyVUZy0DFuHTAJP7asc91+pM7VHkc9Z7haWYovO9EP7+3N+qTHB5FORMVevDQojHYryi2Z26j94wAhASH2x+fvnwM06lL5/n0kqIJAgUpSlNliEo25xo3WUGci/wVuVYnnUqLthD6QbZt0Y1XyJXbfTsi7ny/n7peZp6lQiG3A6AZr+byucYxtGNnOBVsWN4HfRwd4OfrBjNgKuwXjxKxKXetPY/QuVu6fvwIDAQAB
------END PUBLIC KEY-----"""
-KEYCLOAK_CONFIG = {
-    'KEYCLOAK_REALM': 'Demo',
-    'KEYCLOAK_CLIENT_ID': 'demo-client',
-    'KEYCLOAK_DEFAULT_ACCESS': 'ALLOW', # DENY or ALLOW
-    'KEYCLOAK_AUTHORIZATION_CONFIG': os.path.join(CONFIG_DIR, 'authorization-config.json'),
-    'KEYCLOAK_METHOD_VALIDATE_TOKEN': 'DECODE',
-    'KEYCLOAK_SERVER_URL': 'http://localhost:8088/auth/',
-    'KEYCLOAK_CLIENT_SECRET_KEY': '6cfd707a-ad3e-49a9-8442-f9536550bdf2',
-    'KEYCLOAK_CLIENT_PUBLIC_KEY': KEYCLOAK_CLIENT_PUBLIC_KEY,
+MANGO_JWT_SETTINGS = {
+    "db_host": "localhost",
+    "db_port": "27017",
+    "db_name": "abac_poc"
 }

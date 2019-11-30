@@ -1,60 +1,35 @@
-from django.shortcuts import render
-
-from rest_framework import viewsets
-from rest_framework import status
-
-from rest_framework.response import Response
-import json
-
-from opportunity.models import Opportunity
+#from django.contrib.auth.models import User
+from rest_framework_mongoengine import viewsets
 from opportunity.serializers import OpportunitySerializer
+from opportunity.models import Opportunity
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from user.models import User
+from user.serializers import UserSerializer
+from authz.services import OPAAuthService
+from rest_framework.exceptions import PermissionDenied
 
-class HTTPResponse(Response):
+class OpportunityViewSet(viewsets.ModelViewSet):
     """
-    Custom response structure for api call responses.
+    API endpoint that allows users to be viewed or edited.
     """
-    def __init__(self, data=None, status=None,
-                 template_name=None, headers=None,
-                 exception=False, content_type=None):
-        if isinstance(data, str):
-            self.data = json.loads(data)
-        else:
-            self.data = data
-
-        super(HTTPResponse, self).__init__(data=self.data, status=status)
-
-
-class OpportunityViewSet(viewsets.GenericViewSet):
-    keycloak_scopes = {
-        'GET': 'opportunity:view',
-        'POST': 'opportunity:add',
-        'PUT': 'opportunity:update',
-        'DELETE': 'opportunity:delete'
-    }
     serializer_class = OpportunitySerializer
-    def get_opportunity(self, request):
-        id = request.GET.get('id', '')
-        if id:
-            opportunity = Opportunity.objects.get(id=id)
-            opportunity = [opportunity]
+    lookup_field = 'id'
+    queryset = Opportunity.objects.all()
+
+
+class OpportunityDetailViewSet(viewsets.GenericViewSet):
+
+    def get_opportunity(self, request, opportunity_id):
+
+        user = User.objects.get(id=request.data.get('user_id', ''))
+        user = UserSerializer(user).data
+        opp = Opportunity.objects.get(id=opportunity_id)
+        data = OpportunitySerializer(opp).data
+        resource = data
+        resource["type"] = "opportunity"
+        permitted = OPAAuthService.request_auth(user, data, "view")
+        if permitted:
+            return Response(data)
         else:
-            opportunity = Opportunity.objects.all()
-        opportunity = OpportunitySerializer(opportunity, many=True).data
-        #return HTTPResponse(opportunity, status.HTTP_200_OK)
-        return Response({'opportunities': opportunity}, template_name='opportunities.html')
-
-    def create_opportunity(self, request):
-
-        title = request.data.get('title', 'Test')
-        description = request.data.get('description', '')
-        author = request.user
-        managed_by = request.user
-
-        opportunity = Opportunity()
-        opportunity.title = title
-        opportunity.description = description
-        opportunity.author = author
-        opportunity.managed_by = managed_by
-        opportunity.save()
-        data = OpportunitySerializer(opportunity).data
-        return HTTPResponse(opportunity, status.HTTP_200_OK)
+            raise PermissionDenied
