@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <table>
+        <thead>
+            <td> Id </td>
+            <td>Title</td>
+            <td>Description</td>
+            <td>Author</td>
+            <td>Managed By</td>
+        </thead>
+        {% for opportunity in opportunities %}
+            <tr>
+                <td>opportunity.id</td>
+                <td>opportunity.title</td>
+                <td>opportunity.description</td>
+                <td>opportunity.author</td>
+                <td>opportunity.managed_by</td>
+            </tr>
+        {%endfor%}
+    </table>
+
+</body>
+</html>
