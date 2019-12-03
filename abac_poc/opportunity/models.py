@@ -12,3 +12,4 @@ class Opportunity(Document):
     author = ReferenceField(User)
     managed_by = ReferenceField(User)
     company = ReferenceField(Company)
+    resource_id = StringField()

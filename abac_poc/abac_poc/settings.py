@@ -39,10 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_mongoengine',
-    'mongo_auth',
     'user',
     'company',
-    'opportunity'
+    'opportunity',
+    'authz'
 ]
 
 MIDDLEWARE = [
@@ -106,6 +106,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'authz.auth.MyCustomAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated'
+    ]
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -145,9 +154,11 @@ def setup_connection():
 
 setup_connection()
 
-
-MANGO_JWT_SETTINGS = {
-    "db_host": "localhost",
-    "db_port": "27017",
-    "db_name": "abac_poc"
+KEYCLOAK_SETTINGS = {
+    'server_url': 'http://localhost:8080/',
+    'admin_realm_name': 'master',
+    'admin_client_id': 'admin-cli',
+    'app_client_secret': '6cfd707a-ad3e-49a9-8442-f9536550bdf2',
+    'app_realm_name': 'Demo',
+    'app_client_id': 'demo-client'
 }
